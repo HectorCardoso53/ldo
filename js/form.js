@@ -126,10 +126,6 @@ document.getElementById("nome")?.addEventListener("blur", () => {
   const v = document.getElementById("nome").value.trim();
   v ? marcarValido("nome") : marcarInvalido("nome", "Informe seu nome completo.");
 });
-document.getElementById("cpf")?.addEventListener("blur", () => {
-  const v = document.getElementById("cpf").value.trim();
-  v ? marcarValido("cpf") : marcarInvalido("cpf", "Informe seu CPF.");
-});
 document.getElementById("idade")?.addEventListener("blur", () => {
   const v = Number(document.getElementById("idade").value);
   (v >= 1 && v <= 120) ? marcarValido("idade") : marcarInvalido("idade", "Informe uma idade válida.");
@@ -178,7 +174,7 @@ document.querySelectorAll('input[name="sexo"]').forEach((r) => {
 
 // ─── Progresso visual ────────────────────────────────────────
 // Campos obrigatórios de identificação (exceto sexo que é radio)
-const CAMPOS_IDENT = ["nome", "cpf", "idade", "telefone", "email", "bairro", "zona"];
+const CAMPOS_IDENT = ["nome", "idade", "telefone", "email", "bairro", "zona"];
 
 function atualizarProgresso() {
   // conta campos de identificação preenchidos
@@ -274,16 +270,6 @@ function validar() {
     valido = false;
   } else {
     marcarValido("nome");
-  }
-
-  // ── CPF ──
-  const cpf = document.getElementById("cpf").value.trim();
-  if (!cpf) {
-    marcarInvalido("cpf", "Informe seu CPF.");
-    if (!primeiroErro) primeiroErro = "cpf";
-    valido = false;
-  } else {
-    marcarValido("cpf");
   }
 
   // ── Idade ──

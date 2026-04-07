@@ -23,27 +23,35 @@
 
 <body>
 
-  <!-- ══ HEADER ══ -->
   <header class="header-ldo">
     <div class="container">
+
       <div class="header-top d-flex align-items-center justify-content-between">
+
+        <!-- ESQUERDA -->
         <div class="d-flex align-items-center gap-2">
           <div class="logo-prefeitura">
-            <img src="img/prefeitura.png" alt="Prefeitura"
-              onerror="this.style.display='none';this.parentElement.innerHTML='🏛️'">
+            <img src="img/prefeitura.png" alt="Prefeitura">
           </div>
+
           <div class="header-conteudo">
             <h1>Consulta Pública</h1>
             <span class="subtitulo">LDO 2026 • Participação Cidadã</span>
           </div>
         </div>
-        <span class="badge-ano d-none d-md-inline">
+
+        <!-- DIREITA -->
+        <span class="badge-ano">
           <i class="bi bi-calendar-event me-1"></i>2026
         </span>
+
       </div>
+
+      <!-- PROGRESSO -->
       <div class="progresso-form mt-2">
         <div class="progresso-barra" id="progressoBarra"></div>
       </div>
+
     </div>
   </header>
 
@@ -91,8 +99,8 @@
             </div>
 
             <div class="col-md-3">
-              <label class="form-label" for="cpf">CPF <span class="text-danger">*</span></label>
-              <input type="text" id="cpf" class="form-control" placeholder="000.000.000-00" maxlength="14" required>
+              <label class="form-label" for="cpf">CPF <small class="text-muted">(opcional)</small></label>
+              <input type="text" id="cpf" class="form-control" placeholder="000.000.000-00" maxlength="14">
             </div>
 
             <div class="col-md-3">
@@ -154,7 +162,6 @@
             <!-- legenda campos obrigatórios -->
             <div class="col-12">
               <p class="text-muted" style="font-size:.8rem; margin-bottom:0">
-                <span class="text-danger fw-bold">*</span> Todos os campos são obrigatórios.
               </p>
             </div>
 
@@ -727,33 +734,29 @@
           <i class="bi bi-send-fill me-2"></i>
           Enviar Participação
         </button>
-        <p class="text-muted small mt-2">
-          Seus dados são utilizados apenas para fins estatísticos e de planejamento público.
-        </p>
       </div>
-
     </form>
   </main>
 
   <!-- FOOTER -->
   <footer class="footer-ldo">
-    <div class="container">
+    <div class="container footer-content">
 
-      <p class="footer-titulo">
-        © 2026 Prefeitura Municipal de Oriximiná
-      </p>
+      <span class="footer-main">
+        © 2026 Prefeitura de Oriximiná
+      </span>
 
-      <p class="footer-sub">
-        Consulta Pública • Lei de Diretrizes Orçamentárias (LDO 2026)
-      </p>
+      <span class="footer-sep">•</span>
 
-      <p class="footer-orgao">
-        Secretaria de Eficiência Governamental
-      </p>
+      <span class="footer-sub">
+        LDO 2026
+      </span>
 
-      <p class="footer-info">
-        Dados armazenados com segurança e utilizados exclusivamente para fins de planejamento público.
-      </p>
+      <span class="footer-sep">•</span>
+
+      <span class="footer-orgao">
+        Sec. de Eficiência Governamental
+      </span>
 
     </div>
   </footer>

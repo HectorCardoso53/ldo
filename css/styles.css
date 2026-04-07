@@ -33,90 +33,71 @@ body {
   color: var(--texto);
 }
 
-/* ========= HEADER ========= */
+/* ========= HEADER SIMPLES ========= */
 .header-ldo {
-  background: linear-gradient(135deg,
-      var(--azul-escuro) 0%,
-      var(--azul) 60%,
-      var(--azul-claro) 100%);
+  background: linear-gradient(90deg, var(--azul-escuro), var(--azul));
   color: white;
-  padding: 1rem 0 0.8rem;
-  /* antes era 2.2rem → MUITO alto */
-  position: relative;
-  overflow: hidden;
+  padding: 0.8rem 0 0.6rem;
+  border-bottom: 3px solid var(--amarelo);
 }
 
-.header-ldo::before {
-  content: '';
-  position: absolute;
-  top: -40px;
-  right: -60px;
-  width: 280px;
-  height: 280px;
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 50%;
-}
-
+/* remove efeitos pesados */
+.header-ldo::before,
 .header-ldo::after {
-  content: '';
-  position: absolute;
-  bottom: -60px;
-  left: -40px;
-  width: 200px;
-  height: 200px;
-  background: rgba(245, 197, 24, 0.10);
-  border-radius: 50%;
+  display: none;
 }
 
-.header-ldo .badge-ano {
-  background: var(--amarelo);
-  color: var(--azul-escuro);
-  font-family: 'Sora', sans-serif;
-  font-weight: 700;
-  font-size: 0.82rem;
-  letter-spacing: 0.06em;
-  padding: 0.3rem 0.85rem;
-  border-radius: 20px;
-  display: inline-block;
-  margin-bottom: 0.7rem;
+/* conteúdo */
+.header-top {
+  gap: 0.5rem;
 }
 
-.header-ldo h1 {
-  font-family: 'Sora', sans-serif;
-  font-size: 2rem;
-  font-weight: 700;
-  line-height: 1.2;
-  margin-bottom: 0.4rem;
-}
-
-.header-ldo p {
-  font-size: 1rem;
-  opacity: 0.85;
-  font-weight: 300;
-}
-
-.header-conteudo {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-}
-
+/* título */
 .header-conteudo h1 {
-  font-size: 1.4rem;
-  line-height: 1.1;
-}
-
-.header-conteudo .subtitulo {
-  font-size: 1rem;
-  opacity: 0.85;
-  font-weight: 400;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 600;
   margin: 0;
 }
 
-.header-top {
-  align-items: center;
-  gap: 0.6rem;
-  /* antes estava muito espaçado */
+/* subtítulo */
+.header-conteudo .subtitulo {
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+/* logo menor */
+.logo-prefeitura {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 4px;
+}
+
+/* badge mais discreto */
+.badge-ano {
+  background: var(--amarelo);
+  color: var(--azul-escuro);
+  font-size: 0.7rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+/* barra progresso */
+.progresso-form {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progresso-barra {
+  height: 100%;
+  background: var(--amarelo);
+  width: 40%;
+  transition: width 0.3s ease;
 }
 
 .logo-prefeitura {
@@ -719,56 +700,39 @@ body {
   }
 }
 
-/* ========= FOOTER ========= */
+/* ========= FOOTER COMPACTO ========= */
 .footer-ldo {
-  background: linear-gradient(135deg,
-      var(--azul-escuro),
-      var(--azul));
-  color: rgba(255, 255, 255, 0.8);
-  text-align: center;
-  padding: 2rem 1rem 1.5rem;
-  margin-top: 3rem;
+  background: var(--azul-escuro);
+  color: rgba(255, 255, 255, 0.75);
+  padding: 0.6rem 0;
+  margin-top: 2rem;
+  border-top: 2px solid var(--amarelo);
 }
 
-/* título principal */
-.footer-titulo {
-  font-family: 'Outfit', sans-serif;
-  font-weight: 600;
-  font-size: 0.95rem;
-  margin-bottom: 0.3rem;
-}
-
-/* subtítulo */
-.footer-sub {
-  font-size: 0.85rem;
-  opacity: 0.9;
-  margin-bottom: 0.4rem;
-}
-
-/* órgão */
-.footer-orgao {
-  font-size: 0.8rem;
-  opacity: 0.75;
-  margin-bottom: 0.6rem;
-}
-
-/* texto final */
-.footer-info {
+/* layout em linha */
+.footer-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
   font-size: 0.75rem;
-  opacity: 0.6;
-  max-width: 600px;
-  margin: 0 auto;
-  line-height: 1.4;
 }
 
-/* links */
-.footer-ldo a {
-  color: var(--amarelo);
-  text-decoration: none;
+/* separador */
+.footer-sep {
+  opacity: 0.5;
 }
 
-.footer-ldo a:hover {
-  text-decoration: underline;
+/* destaque leve */
+.footer-main {
+  font-weight: 500;
+}
+
+/* texto menor */
+.footer-sub,
+.footer-orgao {
+  opacity: 0.7;
 }
 
 /* RESPONSIVO */
