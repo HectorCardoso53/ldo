@@ -14,6 +14,9 @@ import { db } from "./firebase.js";
 import {
   collection,
   addDoc,
+  getDocs,
+  query,
+  where,
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -102,48 +105,277 @@ function verificarBotaoNec() {
 btnAddNec.addEventListener("click", () => criarItemNecessidade());
 criarItemNecessidade(); // inicia com 1 campo
 
+// ─── Verificação de e-mail único no Firestore ────────────────
+/**
+ * Consulta o Firestore e verifica se o e-mail já foi usado.
+ * Retorna true se o e-mail JÁ EXISTE (duplicado), false se está livre.
+ */
+async function emailJaCadastrado(email) {
+  const q    = query(
+    collection(db, COL_RESPOSTAS),
+    where("identificacao.email", "==", email.toLowerCase())
+  );
+  const snap = await getDocs(q);
+  return !snap.empty;
+}
+
+// ─── Feedback em tempo real (ao sair do campo) ───────────────
+const reEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+document.getElementById("nome")?.addEventListener("blur", () => {
+  const v = document.getElementById("nome").value.trim();
+  v ? marcarValido("nome") : marcarInvalido("nome", "Informe seu nome completo.");
+});
+document.getElementById("cpf")?.addEventListener("blur", () => {
+  const v = document.getElementById("cpf").value.trim();
+  v ? marcarValido("cpf") : marcarInvalido("cpf", "Informe seu CPF.");
+});
+document.getElementById("idade")?.addEventListener("blur", () => {
+  const v = Number(document.getElementById("idade").value);
+  (v >= 1 && v <= 120) ? marcarValido("idade") : marcarInvalido("idade", "Informe uma idade válida.");
+});
+document.getElementById("telefone")?.addEventListener("blur", () => {
+  const v = document.getElementById("telefone").value.trim();
+  v ? marcarValido("telefone") : marcarInvalido("telefone", "Informe seu telefone ou WhatsApp.");
+});
+document.getElementById("email")?.addEventListener("blur", async () => {
+  const v = document.getElementById("email").value.trim();
+  if (!v) {
+    marcarInvalido("email", "Informe seu e-mail.");
+    return;
+  }
+  if (!reEmail.test(v)) {
+    marcarInvalido("email", "Informe um e-mail válido.");
+    return;
+  }
+  // Formato válido → verifica no Firestore se já existe
+  try {
+    const duplicado = await emailJaCadastrado(v);
+    if (duplicado) {
+      marcarInvalido("email", "Este e-mail já foi utilizado para responder a consulta.");
+    } else {
+      marcarValido("email");
+    }
+  } catch {
+    // silencia erro de rede no blur; o submit vai verificar novamente
+    marcarValido("email");
+  }
+});
+document.getElementById("bairro")?.addEventListener("blur", () => {
+  const v = document.getElementById("bairro").value.trim();
+  v ? marcarValido("bairro") : marcarInvalido("bairro", "Informe seu bairro ou localidade.");
+});
+document.getElementById("zona")?.addEventListener("change", () => {
+  const v = document.getElementById("zona").value;
+  v ? marcarValido("zona") : marcarInvalido("zona", "Selecione a zona de residência.");
+});
+document.querySelectorAll('input[name="sexo"]').forEach((r) => {
+  r.addEventListener("change", () => {
+    const erroSexo = document.getElementById("erroSexo");
+    if (erroSexo) erroSexo.style.display = "none";
+  });
+});
+
 // ─── Progresso visual ────────────────────────────────────────
+// Campos obrigatórios de identificação (exceto sexo que é radio)
+const CAMPOS_IDENT = ["nome", "cpf", "idade", "telefone", "email", "bairro", "zona"];
+
 function atualizarProgresso() {
-  let total = 4, preenchidos = 0;
+  // conta campos de identificação preenchidos
+  const identOk = CAMPOS_IDENT.filter((id) => {
+    const el = document.getElementById(id);
+    return el && el.value.trim() !== "";
+  }).length;
+  const sexoOk = document.querySelector('input[name="sexo"]:checked') ? 1 : 0;
+  const totalIdent = CAMPOS_IDENT.length + 1; // +1 para sexo
 
-  // nome
-  if (document.getElementById("nome")?.value.trim()) preenchidos++;
-  // bairro
-  if (document.getElementById("bairro")?.value.trim()) preenchidos++;
-  // zona
-  if (document.getElementById("zona")?.value) preenchidos++;
-  // perfil (radio)
-  if (document.querySelector('input[name="perfil"]:checked')) preenchidos++;
+  // perfil selecionado
+  const perfilOk = document.querySelector('input[name="perfil"]:checked') ? 1 : 0;
 
-  // bônus: ao menos 1 prioridade (+1 ao total)
-  total++;
-  if (document.querySelectorAll('input[name="prioridade"]:checked').length > 0) preenchidos++;
+  // ao menos 1 prioridade
+  const priOk = document.querySelectorAll('input[name="prioridade"]:checked').length > 0 ? 1 : 0;
+
+  const preenchidos = identOk + sexoOk + perfilOk + priOk;
+  const total       = totalIdent + 1 + 1; // ident + perfil + prioridade
 
   const pct = Math.round((preenchidos / total) * 100);
   if (progressoBarra) progressoBarra.style.width = pct + "%";
 }
 
-["nome", "bairro", "zona"].forEach((id) => {
-  document.getElementById(id)?.addEventListener("input", atualizarProgresso);
+// Ouvintes de progresso
+CAMPOS_IDENT.forEach((id) => {
+  document.getElementById(id)?.addEventListener("input",  atualizarProgresso);
   document.getElementById(id)?.addEventListener("change", atualizarProgresso);
 });
+document.querySelectorAll('input[name="sexo"]')
+  .forEach((r) => r.addEventListener("change", atualizarProgresso));
 document.querySelectorAll('input[name="perfil"]')
   .forEach((r) => r.addEventListener("change", atualizarProgresso));
 
-// ─── Validação ───────────────────────────────────────────────
+// ─── Validação completa ───────────────────────────────────────
+/**
+ * Marca um campo como inválido e exibe mensagem inline.
+ * Retorna false para encadeamento.
+ */
+function marcarInvalido(id, msg) {
+  const el = document.getElementById(id);
+  if (el) {
+    el.classList.add("campo-invalido");
+    el.classList.remove("campo-valido");
+    // mensagem inline (cria se não existir)
+    const erroId = `erro_${id}`;
+    let erroEl = document.getElementById(erroId);
+    if (!erroEl) {
+      erroEl = document.createElement("div");
+      erroEl.id = erroId;
+      erroEl.className = "campo-erro";
+      el.parentNode.appendChild(erroEl);
+    }
+    erroEl.innerHTML = `<i class="bi bi-exclamation-circle me-1"></i>${msg}`;
+    erroEl.style.display = "flex";
+  }
+  return false;
+}
+
+function marcarValido(id) {
+  const el = document.getElementById(id);
+  if (el) {
+    el.classList.remove("campo-invalido");
+    el.classList.add("campo-valido");
+    const erroEl = document.getElementById(`erro_${id}`);
+    if (erroEl) erroEl.style.display = "none";
+  }
+}
+
+function limparValidacoes() {
+  document.querySelectorAll(".campo-invalido").forEach((el) => {
+    el.classList.remove("campo-invalido");
+  });
+  document.querySelectorAll(".campo-valido").forEach((el) => {
+    el.classList.remove("campo-valido");
+  });
+  document.querySelectorAll(".campo-erro").forEach((el) => {
+    el.style.display = "none";
+  });
+  const erroSexo = document.getElementById("erroSexo");
+  if (erroSexo) erroSexo.style.display = "none";
+}
+
 function validar() {
+  limparValidacoes();
+  let valido = true;
+  let primeiroErro = null;
+
+  // ── Nome ──
   const nome = document.getElementById("nome").value.trim();
   if (!nome) {
-    mostrarErro("⚠️ Por favor, informe seu nome completo.");
-    document.getElementById("nome").focus();
-    return false;
+    marcarInvalido("nome", "Informe seu nome completo.");
+    if (!primeiroErro) primeiroErro = "nome";
+    valido = false;
+  } else {
+    marcarValido("nome");
   }
+
+  // ── CPF ──
+  const cpf = document.getElementById("cpf").value.trim();
+  if (!cpf) {
+    marcarInvalido("cpf", "Informe seu CPF.");
+    if (!primeiroErro) primeiroErro = "cpf";
+    valido = false;
+  } else {
+    marcarValido("cpf");
+  }
+
+  // ── Idade ──
+  const idade = document.getElementById("idade").value;
+  if (!idade || Number(idade) < 1 || Number(idade) > 120) {
+    marcarInvalido("idade", "Informe uma idade válida.");
+    if (!primeiroErro) primeiroErro = "idade";
+    valido = false;
+  } else {
+    marcarValido("idade");
+  }
+
+  // ── Sexo (radio – tratamento especial) ──
+  const sexoCheck = document.querySelector('input[name="sexo"]:checked');
+  const erroSexo  = document.getElementById("erroSexo");
+  if (!sexoCheck) {
+    if (erroSexo) erroSexo.style.display = "flex";
+    if (!primeiroErro) primeiroErro = "sexoF";
+    valido = false;
+  } else {
+    if (erroSexo) erroSexo.style.display = "none";
+  }
+
+  // ── Telefone ──
+  const tel = document.getElementById("telefone").value.trim();
+  if (!tel) {
+    marcarInvalido("telefone", "Informe seu telefone ou WhatsApp.");
+    if (!primeiroErro) primeiroErro = "telefone";
+    valido = false;
+  } else {
+    marcarValido("telefone");
+  }
+
+  // ── E-mail ──
+  const email = document.getElementById("email").value.trim();
+  const reEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!email) {
+    marcarInvalido("email", "Informe seu e-mail.");
+    if (!primeiroErro) primeiroErro = "email";
+    valido = false;
+  } else if (!reEmail.test(email)) {
+    marcarInvalido("email", "Informe um e-mail válido.");
+    if (!primeiroErro) primeiroErro = "email";
+    valido = false;
+  } else {
+    marcarValido("email");
+  }
+
+  // ── Bairro ──
+  const bairro = document.getElementById("bairro").value.trim();
+  if (!bairro) {
+    marcarInvalido("bairro", "Informe seu bairro ou localidade.");
+    if (!primeiroErro) primeiroErro = "bairro";
+    valido = false;
+  } else {
+    marcarValido("bairro");
+  }
+
+  // ── Zona ──
+  const zona = document.getElementById("zona").value;
+  if (!zona) {
+    marcarInvalido("zona", "Selecione a zona de residência.");
+    if (!primeiroErro) primeiroErro = "zona";
+    valido = false;
+  } else {
+    marcarValido("zona");
+  }
+
+  // ── Prioridades ──
   const prioridades = document.querySelectorAll('input[name="prioridade"]:checked');
   if (prioridades.length === 0) {
     mostrarErro("⚠️ Selecione pelo menos 1 área prioritária.");
-    return false;
+    if (!primeiroErro) primeiroErro = "listaPrioridades";
+    valido = false;
   }
-  return true;
+
+  // Rola até o primeiro campo com erro
+  if (!valido) {
+    if (primeiroErro) {
+      const el = document.getElementById(primeiroErro);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        setTimeout(() => el.focus?.(), 400);
+      }
+    }
+    if (prioridades.length > 0) {
+      // Só mostra erro geral se não for apenas o de prioridades
+      mostrarErro("⚠️ Preencha todos os campos obrigatórios antes de enviar.");
+    }
+  }
+
+  return valido;
 }
 
 // ─── Coleta de dados ─────────────────────────────────────────
@@ -228,16 +460,34 @@ form.addEventListener("submit", async (e) => {
   btnEnviar.disabled = true;
   btnEnviar.innerHTML = `
     <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-    Enviando...
+    Verificando...
   `;
 
   try {
+    const email = document.getElementById("email").value.trim().toLowerCase();
+
+    // ── Verifica duplicidade antes de salvar ──────────────────
+    const duplicado = await emailJaCadastrado(email);
+    if (duplicado) {
+      marcarInvalido("email", "Este e-mail já foi utilizado para responder a consulta.");
+      document.getElementById("email").scrollIntoView({ behavior: "smooth", block: "center" });
+      mostrarErro(
+        "⚠️ Este e-mail já possui uma resposta registrada. Cada participante pode responder apenas uma vez."
+      );
+      return; // interrompe o envio
+    }
+
+    // ── Salva no Firestore ────────────────────────────────────
     const dados = coletarDados();
+    // Normaliza o e-mail para minúsculas antes de salvar
+    dados.identificacao.email = email;
     await addDoc(collection(db, COL_RESPOSTAS), dados);
+
     mostrarSucesso();
     limparFormulario();
     if (progressoBarra) progressoBarra.style.width = "0%";
     window.scrollTo({ top: 0, behavior: "smooth" });
+
   } catch (err) {
     console.error("Erro ao salvar:", err);
     mostrarErro("❌ Ocorreu um erro ao enviar. Verifique sua conexão e tente novamente.");
@@ -264,10 +514,12 @@ function esconderAlertas() {
 }
 function limparFormulario() {
   form.reset();
+  // limpar estados de validação
+  limparValidacoes();
   // resetar campos desabilitados
-  const perfilOutro = document.getElementById("perfilOutroTexto");
-  if (perfilOutro) { perfilOutro.disabled = true; perfilOutro.value = ""; }
-  if (priOutroTexto) { priOutroTexto.disabled = true; priOutroTexto.value = ""; }
+  const perfilOutroEl = document.getElementById("perfilOutroTexto");
+  if (perfilOutroEl) { perfilOutroEl.disabled = true; perfilOutroEl.value = ""; }
+  if (priOutroTexto)  { priOutroTexto.disabled = true;  priOutroTexto.value = ""; }
   // resetar necessidades
   listaNecess.innerHTML = "";
   criarItemNecessidade();

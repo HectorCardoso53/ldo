@@ -115,14 +115,15 @@ body {
 
 .header-top {
   align-items: center;
-   gap: 0.6rem; /* antes estava muito espaçado */
+  gap: 0.6rem;
+  /* antes estava muito espaçado */
 }
 
 .logo-prefeitura {
   width: 52px;
   height: 52px;
   border-radius: 10px;
-  background: rgba(255,255,255,0.08);
+  background: rgba(255, 255, 255, 0.08);
   padding: 5px;
 }
 
@@ -131,6 +132,7 @@ body {
   height: 100%;
   object-fit: contain;
 }
+
 .nav-tabs-ldo {
   background: var(--azul-escuro);
   border-bottom: 3px solid var(--amarelo);
@@ -717,19 +719,56 @@ body {
   }
 }
 
-/* FOOTER */
-footer {
-  background: var(--azul-escuro);
-  color: rgba(255, 255, 255, 0.7);
+/* ========= FOOTER ========= */
+.footer-ldo {
+  background: linear-gradient(135deg,
+      var(--azul-escuro),
+      var(--azul));
+  color: rgba(255, 255, 255, 0.8);
   text-align: center;
-  padding: 1.5rem;
+  padding: 2rem 1rem 1.5rem;
   margin-top: 3rem;
-  font-size: 0.82rem;
 }
 
-footer a {
+/* título principal */
+.footer-titulo {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 0.3rem;
+}
+
+/* subtítulo */
+.footer-sub {
+  font-size: 0.85rem;
+  opacity: 0.9;
+  margin-bottom: 0.4rem;
+}
+
+/* órgão */
+.footer-orgao {
+  font-size: 0.8rem;
+  opacity: 0.75;
+  margin-bottom: 0.6rem;
+}
+
+/* texto final */
+.footer-info {
+  font-size: 0.75rem;
+  opacity: 0.6;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.4;
+}
+
+/* links */
+.footer-ldo a {
   color: var(--amarelo);
   text-decoration: none;
+}
+
+.footer-ldo a:hover {
+  text-decoration: underline;
 }
 
 /* RESPONSIVO */

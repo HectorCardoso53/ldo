@@ -15,6 +15,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <!-- jsPDF + html2canvas (exportação PDF) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <!-- Estilos locais -->
   <link rel="stylesheet" href="css/styles.css">
 </head>
@@ -31,7 +34,7 @@
         </div>
         <div class="header-conteudo">
           <h1>Resultados da Consulta</h1>
-          <span class="subtitulo">LDO 2026 • Análise em tempo real</span>
+          <span class="subtitulo">LDO 2026 • Visão geral dos dados</span>
         </div>
       </div>
       <span class="badge-ano d-none d-md-inline">
@@ -68,10 +71,10 @@
     <p>Carregando dados do Firebase...</p>
   </div>
 
-  <!-- Conteúdo -->
+  <!-- Conteúdo principal -->
   <div id="areaConteudo" style="display:none">
 
-    <!-- Filtros -->
+    <!-- ── Filtros ── -->
     <div class="filtros-bar">
       <div>
         <label>Bairro / Localidade</label>
@@ -85,15 +88,36 @@
           <option value="">Todas</option>
         </select>
       </div>
+      <div>
+        <label>Sexo</label>
+        <select id="filtroSexo" class="form-select form-select-sm">
+          <option value="">Todos</option>
+          <option value="Feminino">Feminino</option>
+          <option value="Masculino">Masculino</option>
+          <option value="Outro">Outro</option>
+        </select>
+      </div>
+      <div>
+        <label>Perfil</label>
+        <select id="filtroPerfil" class="form-select form-select-sm">
+          <option value="">Todos</option>
+        </select>
+      </div>
       <button id="btnAtualizar" class="btn btn-sm btn-outline-secondary align-self-end">
         <i class="bi bi-arrow-clockwise me-1"></i> Atualizar
       </button>
       <button id="btnExportar" class="btn-exportar align-self-end">
-        <i class="bi bi-download me-1"></i> Exportar CSV
+        <span id="btnExportarIcone"><i class="bi bi-file-earmark-pdf-fill me-1"></i> Exportar PDF</span>
+        <span id="btnExportarLoading" style="display:none">
+          <span class="spinner-border spinner-border-sm me-1"></span> Gerando PDF...
+        </span>
       </button>
     </div>
 
-    <!-- Estatísticas -->
+    <!-- ══ BLOCO 1 – ESTATÍSTICAS GERAIS ══ -->
+    <div class="dash-secao-titulo">
+      <i class="bi bi-clipboard-data-fill me-2"></i>Visão Geral
+    </div>
     <div class="row g-3 mb-4">
       <div class="col-6 col-md-3">
         <div class="stat-card">
@@ -124,39 +148,110 @@
       </div>
       <div class="col-6 col-md-3">
         <div class="stat-card">
-          <div class="stat-icon roxo"><i class="bi bi-geo-alt-fill"></i></div>
+          <div class="stat-icon roxo"><i class="bi bi-person-fill"></i></div>
           <div>
-            <div class="stat-numero" id="statZona" style="font-size:1.1rem">–</div>
+            <div class="stat-numero" id="statIdadeMedia">–</div>
+            <div class="stat-label">Idade Média</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="stat-icon verde"><i class="bi bi-geo-alt-fill"></i></div>
+          <div>
+            <div class="stat-numero" id="statZona" style="font-size:1rem">–</div>
             <div class="stat-label">Zona Mais Ativa</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="stat-icon amarelo"><i class="bi bi-people-fill"></i></div>
+          <div>
+            <div class="stat-numero" id="statPerfil" style="font-size:1rem">–</div>
+            <div class="stat-label">Perfil Mais Frequente</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="stat-icon azul"><i class="bi bi-megaphone-fill"></i></div>
+          <div>
+            <div class="stat-numero" id="statJaParticipou">–</div>
+            <div class="stat-label">Já participaram antes</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="stat-icon roxo"><i class="bi bi-hand-thumbs-up-fill"></i></div>
+          <div>
+            <div class="stat-numero" id="statAchaImportante">–</div>
+            <div class="stat-label">Acham importante participar</div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Gráficos -->
-    <div class="row g-4">
+    <!-- ══ BLOCO 2 – PERFIL DOS PARTICIPANTES ══ -->
+    <div class="dash-secao-titulo">
+      <i class="bi bi-person-badge-fill me-2"></i>Perfil dos Participantes
+    </div>
+    <div class="row g-4 mb-2">
 
-      <div class="col-lg-7">
+      <div class="col-md-4">
+        <div class="chart-card">
+          <h5>Distribuição por Sexo</h5>
+          <canvas id="chartSexo" height="220"></canvas>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="chart-card">
+          <h5>Participação por Zona</h5>
+          <canvas id="chartZona" height="220"></canvas>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="chart-card">
+          <h5>Perfil do Participante</h5>
+          <canvas id="chartPerfil" height="220"></canvas>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="chart-card">
+          <h5>Faixa Etária</h5>
+          <canvas id="chartIdade" height="200"></canvas>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="chart-card">
+          <h5>Bairros com Mais Participações</h5>
+          <div id="rankingBairros">
+            <p class="text-muted small">Carregando...</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══ BLOCO 3 – PRIORIDADES E NECESSIDADES ══ -->
+    <div class="dash-secao-titulo">
+      <i class="bi bi-star-fill me-2"></i>Prioridades e Necessidades
+    </div>
+    <div class="row g-4 mb-2">
+
+      <div class="col-lg-8">
         <div class="chart-card">
           <h5>Prioridades Mais Votadas</h5>
           <canvas id="chartPrioridades" height="280"></canvas>
         </div>
       </div>
 
-      <div class="col-lg-5">
-        <div class="chart-card">
-          <h5>Avaliação dos Serviços (média 1–5)</h5>
-          <canvas id="chartAvaliacoes" height="260"></canvas>
-          <div id="tabelaMedias" class="mt-3"></div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- Ranking + Zona -->
-    <div class="row g-4 mt-0">
-
-      <div class="col-md-6">
+      <div class="col-lg-4">
         <div class="chart-card">
           <h5>Ranking de Necessidades Relatadas</h5>
           <div id="rankingNecessidades">
@@ -165,18 +260,91 @@
         </div>
       </div>
 
-      <div class="col-md-6">
+    </div>
+
+    <!-- ══ BLOCO 4 – AVALIAÇÕES ══ -->
+    <div class="dash-secao-titulo">
+      <i class="bi bi-bar-chart-line-fill me-2"></i>Avaliação dos Serviços Públicos
+    </div>
+    <div class="row g-4 mb-2">
+
+      <div class="col-lg-5">
         <div class="chart-card">
-          <h5>Participação por Zona</h5>
-          <div id="distribuicaoZona">
-            <p class="text-muted small">Carregando...</p>
-          </div>
+          <h5>Radar de Avaliação (média 1–5)</h5>
+          <canvas id="chartAvaliacoes" height="280"></canvas>
+        </div>
+      </div>
+
+      <div class="col-lg-7">
+        <div class="chart-card">
+          <h5>Notas por Serviço</h5>
+          <canvas id="chartAvaliacoesBarras" height="280"></canvas>
+        </div>
+      </div>
+
+      <div class="col-12">
+        <div class="chart-card">
+          <h5>Detalhamento das Avaliações</h5>
+          <div id="tabelaAvaliacoes" class="table-responsive"></div>
         </div>
       </div>
 
     </div>
 
-    <p class="text-center text-muted mt-3" style="font-size:.78rem">
+    <!-- ══ BLOCO 5 – ENGAJAMENTO ══ -->
+    <div class="dash-secao-titulo">
+      <i class="bi bi-megaphone-fill me-2"></i>Engajamento e Participação
+    </div>
+    <div class="row g-4 mb-2">
+
+      <div class="col-md-4">
+        <div class="chart-card">
+          <h5>Já participou de audiências?</h5>
+          <canvas id="chartParticipou" height="200"></canvas>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="chart-card">
+          <h5>Acha importante participar?</h5>
+          <canvas id="chartImportante" height="200"></canvas>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="chart-card">
+          <h5>Quer receber informações?</h5>
+          <canvas id="chartReceberInfo" height="200"></canvas>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══ BLOCO 6 – SUGESTÕES ══ -->
+    <div class="dash-secao-titulo">
+      <i class="bi bi-chat-quote-fill me-2"></i>Sugestões e Observações
+    </div>
+    <div class="row g-4 mb-4">
+      <div class="col-md-6">
+        <div class="chart-card">
+          <h5>Últimas Sugestões de Obras / Ações</h5>
+          <div id="listaSugestoes">
+            <p class="text-muted small">Carregando...</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="chart-card">
+          <h5>Últimas Observações Finais</h5>
+          <div id="listaObservacoes">
+            <p class="text-muted small">Carregando...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- rodapé -->
+    <p class="text-center text-muted mt-1 mb-3" style="font-size:.78rem">
       <i class="bi bi-cloud-check me-1"></i>
       Dados em tempo real via Firebase Firestore · Prefeitura de Oriximiná · LDO 2026
     </p>
