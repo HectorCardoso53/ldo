@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="img/prefeitura.png">
+  <title>Consulta Pública LDO 2026 – Participação Popular</title>
+  <meta name="description" content="Participe da Consulta Pública da Lei de Diretrizes Orçamentárias. Sua voz importa!" />
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <!-- Estilos locais -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- ══ HEADER ══ -->
+<header class="header-ldo">
+  <div class="container">
+    <div class="header-top d-flex align-items-center justify-content-between">
+      <div class="d-flex align-items-center gap-2">
+        <div class="logo-prefeitura">
+          <img src="img/prefeitura.png" alt="Prefeitura"
+               onerror="this.style.display='none';this.parentElement.innerHTML='🏛️'">
+        </div>
+        <div class="header-conteudo">
+          <h1>Consulta Pública</h1>
+          <span class="subtitulo">LDO 2026 • Participação Cidadã</span>
+        </div>
+      </div>
+      <span class="badge-ano d-none d-md-inline">
+        <i class="bi bi-calendar-event me-1"></i>2026
+      </span>
+    </div>
+    <div class="progresso-form mt-2">
+      <div class="progresso-barra" id="progressoBarra"></div>
+    </div>
+  </div>
+</header>
+
+<!-- NAV -->
+<nav class="nav-tabs-ldo">
+  <div class="container">
+    <ul class="nav">
+      <li class="nav-item">
+        <a class="nav-link active" href="index.html">
+          <i class="bi bi-ui-checks-grid me-1"></i> Formulário
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="dashboard.html">
+          <i class="bi bi-bar-chart-fill me-1"></i> Dashboard
+        </a>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ══ MAIN ══ -->
+<main class="container py-4">
+
+  <div id="alertaSucesso">
+    <i class="bi bi-check-circle-fill me-1"></i>
+    <strong>Obrigado pela sua participação!</strong> Sua resposta foi registrada com sucesso.
+    Juntos construímos um orçamento mais justo para Oriximiná.
+  </div>
+  <div id="alertaErro">
+    <i class="bi bi-exclamation-triangle-fill me-1"></i>
+    Ocorreu um erro. Tente novamente.
+  </div>
+
+  <form id="formLDO" novalidate>
+
+    <!-- ══ 1 – IDENTIFICAÇÃO ══ -->
+    <div class="card card-secao">
+      <div class="card-header">
+        <span class="icone-secao"><i class="bi bi-person-fill"></i></span>
+        1. Identificação do Participante
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+
+          <div class="col-md-6">
+            <label class="form-label" for="nome">Nome completo <span class="text-danger">*</span></label>
+            <input type="text" id="nome" class="form-control"
+                   placeholder="Seu nome completo" maxlength="120" required>
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label" for="cpf">CPF <small class="text-muted">(opcional)</small></label>
+            <input type="text" id="cpf" class="form-control" placeholder="000.000.000-00" maxlength="14">
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label" for="idade">Idade</label>
+            <input type="number" id="idade" class="form-control" placeholder="Ex.: 35" min="1" max="120">
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Sexo</label>
+            <div class="d-flex gap-3 mt-1 flex-wrap">
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="sexo" id="sexoF" value="Feminino">
+                <label class="form-check-label" for="sexoF">Feminino</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="sexo" id="sexoM" value="Masculino">
+                <label class="form-check-label" for="sexoM">Masculino</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="sexo" id="sexoO" value="Outro">
+                <label class="form-check-label" for="sexoO">Outro</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label" for="telefone">Telefone / WhatsApp</label>
+            <input type="tel" id="telefone" class="form-control" placeholder="(93) 99999-9999" maxlength="20">
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label" for="email">E-mail</label>
+            <input type="email" id="email" class="form-control" placeholder="seu@email.com" maxlength="120">
+          </div>
+
+          <div class="col-md-5">
+            <label class="form-label" for="bairro">Bairro / Comunidade / Localidade</label>
+            <input type="text" id="bairro" class="form-control"
+                   placeholder="Nome do seu bairro ou comunidade" maxlength="80">
+          </div>
+
+          <div class="col-md-7">
+            <label class="form-label" for="zona">Zona de Residência</label>
+            <select id="zona" class="form-select">
+              <option value="">Selecione...</option>
+              <option value="Urbana">Urbana</option>
+              <option value="Rural">Rural</option>
+              <option value="Ribeirinha">Ribeirinha</option>
+              <option value="Indígena">Indígena</option>
+              <option value="Quilombola">Quilombola</option>
+            </select>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 2 – PERFIL ══ -->
+    <div class="card card-secao">
+      <div class="card-header">
+        <span class="icone-secao"><i class="bi bi-tag-fill"></i></span>
+        2. Perfil do Participante
+      </div>
+      <div class="card-body">
+        <label class="form-label d-block mb-3">Você participa como:</label>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="perfil" id="perfil1" value="Morador">
+              <label class="form-check-label" for="perfil1">Morador(a)</label>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="perfil" id="perfil2" value="Servidor Público">
+              <label class="form-check-label" for="perfil2">Servidor(a) Público(a)</label>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="perfil" id="perfil3" value="Empresário">
+              <label class="form-check-label" for="perfil3">Empresário(a)</label>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="perfil" id="perfil4" value="Associacao">
+              <label class="form-check-label" for="perfil4">Representante de Associação</label>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="perfil" id="perfil5" value="Estudante">
+              <label class="form-check-label" for="perfil5">Estudante</label>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="perfil" id="perfil6" value="Agricultor">
+              <label class="form-check-label" for="perfil6">Agricultor(a)</label>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="perfil" id="perfil7" value="Pescador">
+              <label class="form-check-label" for="perfil7">Pescador(a)</label>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="perfil" id="perfil8" value="Profissional Liberal">
+              <label class="form-check-label" for="perfil8">Profissional Liberal</label>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="perfil" id="perfil9" value="Lideranca">
+              <label class="form-check-label" for="perfil9">Liderança Comunitária</label>
+            </div>
+          </div>
+          <!-- Outro -->
+          <div class="col-12">
+            <div class="form-check d-flex align-items-center gap-2 flex-wrap">
+              <input class="form-check-input" type="radio" name="perfil" id="perfilOutro" value="Outro">
+              <label class="form-check-label" for="perfilOutro">Outro:</label>
+              <input type="text" id="perfilOutroTexto" class="form-control form-control-sm"
+                     style="max-width:220px" placeholder="Especifique..." disabled>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 3 – PRIORIDADES ══ -->
+    <div class="card card-secao">
+      <div class="card-header">
+        <span class="icone-secao"><i class="bi bi-star-fill"></i></span>
+        3. Áreas Prioritárias para Investimento
+      </div>
+      <div class="card-body">
+        <p class="text-muted small mb-3">
+          Marque até <strong>5 áreas</strong> que você considera prioritárias para receber investimentos públicos.
+        </p>
+        <div class="row g-2" id="listaPrioridades">
+
+          <div class="col-md-6"><div class="form-check">
+            <input class="form-check-input" type="checkbox" id="pri_saude" name="prioridade" value="saude">
+            <label class="form-check-label" for="pri_saude"><i class="bi bi-hospital me-1"></i> Saúde</label>
+          </div></div>
+
+          <div class="col-md-6"><div class="form-check">
+            <input class="form-check-input" type="checkbox" id="pri_educacao" name="prioridade" value="educacao">
+            <label class="form-check-label" for="pri_educacao"><i class="bi bi-book-fill me-1"></i> Educação</label>
+          </div></div>
+
+          <div class="col-md-6"><div class="form-check">
+            <input class="form-check-input" type="checkbox" id="pri_seg" name="prioridade" value="seguranca">
+            <label class="form-check-label" for="pri_seg"><i class="bi bi-shield-fill me-1"></i> Segurança Pública</label>
+          </div></div>
+
+          <div class="col-md-6"><div class="form-check">
+            <input class="form-check-input" type="checkbox" id="pri_infra" name="prioridade" value="infraestrutura">
+            <label class="form-check-label" for="pri_infra"><i class="bi bi-building me-1"></i> Infraestrutura Urbana</label>
+          </div></div>
+
+          <div class="col-md-6"><div class="form-check">
+            <input class="form-check-input" type="checkbox" id="pri_pavi" name="prioridade" value="pavimentacao">
+            <label class="form-check-label" for="pri_pavi"><i class="bi bi-signpost-2-fill me-1"></i> Pavimentação de Ruas</label>
+          </div></div>
+
+          <div class="col-md-6"><div class="form-check">
+            <input class="form-check-input" type="checkbox" id="pri_ilum" name="prioridade" value="iluminacao">
+            <label class="form-check-label" for="pri_ilum"><i class="bi bi-lightbulb-fill me-1"></i> Iluminação Pública</label>
+          </div></div>
+
+          <div class="col-md-6"><div class="form-check">
+            <input class="form-check-input" type="checkbox" id="pri_lim" name="prioridade" value="limpeza">
+            <label class="form-check-label" for="pri_lim"><i class="bi bi-trash-fill me-1"></i> Limpeza Urbana</label>
+          </div></div>
+
+          <div class="col-md-6"><div class="form-check">
+            <input class="form-check-input" type="checkbox" id="pri_san" name="prioridade" value="saneamento">
+            <label class="form-check-label" for="pri_san"><i class="bi bi-droplet-fill me-1"></i> Saneamento Básico</label>
+          </div></div>
+
+          <div class="col-md-6"><div class="form-check">
+            <input class="form-check-input" type="checkbox" id="pri_agua" name="prioridade" value="agua">
+            <label class="form-check-label" for="pri_agua"><i class="bi bi-water me-1"></i> Abastecimento de Água</label>
+          </div></div>
+
+          <div class="col-md-6"><div class="form-check">
+            <input class="form-check-input" type="checkbox" id="pri_hab" name="prioridade" value="habitacao">
+            <label class="form-check-label" for="pri_hab"><i class="bi bi-house-fill me-1"></i> Habitação</label>
+          </div></div>
+
+          <div class="col-md-6"><div class="form-check">
+            <input class="form-check-input" type="checkbox" id="pri_meio" name="prioridade" value="meio_ambiente">
+            <label class="form-check-label" for="pri_meio"><i class="bi bi-tree-fill me-1"></i> Meio Ambiente</label>
+          </div></div>
+
+          <div class="col-md-6"><div class="form-check">
+            <input class="form-check-input" type="checkbox" id="pri_agri" name="prioridade" value="agricultura">
+            <label class="form-check-label" for="pri_agri"><i class="bi bi-flower1 me-1"></i> Agricultura</label>
+          </div></div>
+
+          <div class="col-md-6"><div class="form-check">
+            <input class="form-check-input" type="checkbox" id="pri_emp" name="prioridade" value="emprego">
+            <label class="form-check-label" for="pri_emp"><i class="bi bi-briefcase-fill me-1"></i> Geração de Emprego e Renda</label>
+          </div></div>
+
+          <div class="col-md-6"><div class="form-check">
+            <input class="form-check-input" type="checkbox" id="pri_tur" name="prioridade" value="turismo">
+            <label class="form-check-label" for="pri_tur"><i class="bi bi-geo-alt-fill me-1"></i> Turismo</label>
+          </div></div>
+
+          <div class="col-md-6"><div class="form-check">
+            <input class="form-check-input" type="checkbox" id="pri_cult" name="prioridade" value="cultura">
+            <label class="form-check-label" for="pri_cult"><i class="bi bi-music-note-beamed me-1"></i> Cultura</label>
+          </div></div>
+
+          <div class="col-md-6"><div class="form-check">
+            <input class="form-check-input" type="checkbox" id="pri_esp" name="prioridade" value="esporte">
+            <label class="form-check-label" for="pri_esp"><i class="bi bi-trophy-fill me-1"></i> Esporte e Lazer</label>
+          </div></div>
+
+          <div class="col-md-6"><div class="form-check">
+            <input class="form-check-input" type="checkbox" id="pri_assist" name="prioridade" value="assistencia">
+            <label class="form-check-label" for="pri_assist"><i class="bi bi-people-fill me-1"></i> Assistência Social</label>
+          </div></div>
+
+          <div class="col-md-6"><div class="form-check">
+            <input class="form-check-input" type="checkbox" id="pri_transp" name="prioridade" value="transporte">
+            <label class="form-check-label" for="pri_transp"><i class="bi bi-bus-front-fill me-1"></i> Transporte</label>
+          </div></div>
+
+          <div class="col-md-6"><div class="form-check">
+            <input class="form-check-input" type="checkbox" id="pri_mob" name="prioridade" value="mobilidade">
+            <label class="form-check-label" for="pri_mob"><i class="bi bi-car-front-fill me-1"></i> Mobilidade Urbana</label>
+          </div></div>
+
+          <div class="col-md-6"><div class="form-check">
+            <input class="form-check-input" type="checkbox" id="pri_dig" name="prioridade" value="inclusao_digital">
+            <label class="form-check-label" for="pri_dig"><i class="bi bi-wifi me-1"></i> Inclusão Digital</label>
+          </div></div>
+
+          <div class="col-md-6"><div class="form-check">
+            <input class="form-check-input" type="checkbox" id="pri_jov" name="prioridade" value="juventude">
+            <label class="form-check-label" for="pri_jov"><i class="bi bi-person-badge me-1"></i> Juventude</label>
+          </div></div>
+
+          <div class="col-md-6"><div class="form-check">
+            <input class="form-check-input" type="checkbox" id="pri_mul" name="prioridade" value="mulher">
+            <label class="form-check-label" for="pri_mul"><i class="bi bi-gender-female me-1"></i> Atendimento à Mulher</label>
+          </div></div>
+
+          <div class="col-md-6"><div class="form-check">
+            <input class="form-check-input" type="checkbox" id="pri_ido" name="prioridade" value="idosos">
+            <label class="form-check-label" for="pri_ido"><i class="bi bi-person-fill-check me-1"></i> Políticas para Idosos</label>
+          </div></div>
+
+          <div class="col-md-6"><div class="form-check">
+            <input class="form-check-input" type="checkbox" id="pri_pcd" name="prioridade" value="pcd">
+            <label class="form-check-label" for="pri_pcd"><i class="bi bi-universal-access me-1"></i> Pessoas com Deficiência</label>
+          </div></div>
+
+          <!-- Outro -->
+          <div class="col-12">
+            <div class="form-check d-flex align-items-center gap-2 flex-wrap">
+              <input class="form-check-input" type="checkbox" id="pri_outro" name="prioridade" value="outro">
+              <label class="form-check-label" for="pri_outro">Outro:</label>
+              <input type="text" id="prioridadeOutroTexto" class="form-control form-control-sm"
+                     style="max-width:220px" placeholder="Especifique..." disabled>
+            </div>
+          </div>
+
+        </div>
+        <div id="contadorPrioridades" class="mt-3 small text-muted">
+          0 de 5 selecionadas
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 4 – NECESSIDADES ══ -->
+    <div class="card card-secao">
+      <div class="card-header">
+        <span class="icone-secao"><i class="bi bi-list-check"></i></span>
+        4. Principais Necessidades do seu Bairro / Localidade
+      </div>
+      <div class="card-body">
+        <p class="text-muted small mb-3">
+          Liste as principais necessidades do seu bairro ou comunidade (até 5 itens).
+        </p>
+        <div id="listaNecessidades" class="mb-3"></div>
+        <button type="button" id="btnAddNecessidade" class="btn btn-outline-primary btn-sm">
+          <i class="bi bi-plus-circle me-1"></i> Adicionar necessidade
+        </button>
+      </div>
+    </div>
+
+    <!-- ══ 5 – SUGESTÕES ══ -->
+    <div class="card card-secao">
+      <div class="card-header">
+        <span class="icone-secao"><i class="bi bi-hammer"></i></span>
+        5. Sugestões de Obras, Ações ou Serviços
+      </div>
+      <div class="card-body">
+        <label class="form-label" for="sugestoes">
+          Descreva quais obras, ações ou serviços você considera importantes para serem incluídos na LDO:
+        </label>
+        <textarea id="sugestoes" class="form-control" rows="5"
+                  placeholder="Ex: Construção de uma UBS no bairro X, pavimentação da rua Y, reforma da escola Z..."
+                  maxlength="1000"></textarea>
+        <div class="form-text">Máximo de 1000 caracteres</div>
+      </div>
+    </div>
+
+    <!-- ══ 6 – AVALIAÇÕES ══ -->
+    <div class="card card-secao">
+      <div class="card-header">
+        <span class="icone-secao"><i class="bi bi-bar-chart-line-fill"></i></span>
+        6. Avaliação dos Serviços Públicos
+      </div>
+      <div class="card-body">
+        <p class="text-muted small mb-4">
+          Como você avalia os serviços públicos do município nas áreas abaixo?
+        </p>
+
+        <!-- helper macro: area / icon / name -->
+        <div class="mb-4">
+          <label class="form-label fw-semibold"><i class="bi bi-hospital me-1"></i> Saúde</label>
+          <div class="d-flex flex-wrap gap-3">
+            <div class="form-check"><input class="form-check-input" type="radio" name="aval_saude" value="pessimo" id="s1"><label class="form-check-label" for="s1">Péssimo</label></div>
+            <div class="form-check"><input class="form-check-input" type="radio" name="aval_saude" value="ruim" id="s2"><label class="form-check-label" for="s2">Ruim</label></div>
+            <div class="form-check"><input class="form-check-input" type="radio" name="aval_saude" value="regular" id="s3"><label class="form-check-label" for="s3">Regular</label></div>
+            <div class="form-check"><input class="form-check-input" type="radio" name="aval_saude" value="bom" id="s4"><label class="form-check-label" for="s4">Bom</label></div>
+            <div class="form-check"><input class="form-check-input" type="radio" name="aval_saude" value="otimo" id="s5"><label class="form-check-label" for="s5">Ótimo</label></div>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label fw-semibold"><i class="bi bi-book-fill me-1"></i> Educação</label>
+          <div class="d-flex flex-wrap gap-3">
+            <div class="form-check"><input class="form-check-input" type="radio" name="aval_educacao" value="pessimo" id="e1"><label class="form-check-label" for="e1">Péssimo</label></div>
+            <div class="form-check"><input class="form-check-input" type="radio" name="aval_educacao" value="ruim" id="e2"><label class="form-check-label" for="e2">Ruim</label></div>
+            <div class="form-check"><input class="form-check-input" type="radio" name="aval_educacao" value="regular" id="e3"><label class="form-check-label" for="e3">Regular</label></div>
+            <div class="form-check"><input class="form-check-input" type="radio" name="aval_educacao" value="bom" id="e4"><label class="form-check-label" for="e4">Bom</label></div>
+            <div class="form-check"><input class="form-check-input" type="radio" name="aval_educacao" value="otimo" id="e5"><label class="form-check-label" for="e5">Ótimo</label></div>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label fw-semibold"><i class="bi bi-trash-fill me-1"></i> Limpeza Urbana</label>
+          <div class="d-flex flex-wrap gap-3">
+            <div class="form-check"><input class="form-check-input" type="radio" name="aval_limpeza" value="pessimo" id="l1"><label class="form-check-label" for="l1">Péssimo</label></div>
+            <div class="form-check"><input class="form-check-input" type="radio" name="aval_limpeza" value="ruim" id="l2"><label class="form-check-label" for="l2">Ruim</label></div>
+            <div class="form-check"><input class="form-check-input" type="radio" name="aval_limpeza" value="regular" id="l3"><label class="form-check-label" for="l3">Regular</label></div>
+            <div class="form-check"><input class="form-check-input" type="radio" name="aval_limpeza" value="bom" id="l4"><label class="form-check-label" for="l4">Bom</label></div>
+            <div class="form-check"><input class="form-check-input" type="radio" name="aval_limpeza" value="otimo" id="l5"><label class="form-check-label" for="l5">Ótimo</label></div>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label fw-semibold"><i class="bi bi-lightbulb-fill me-1"></i> Iluminação Pública</label>
+          <div class="d-flex flex-wrap gap-3">
+            <div class="form-check"><input class="form-check-input" type="radio" name="aval_iluminacao" value="pessimo" id="i1"><label class="form-check-label" for="i1">Péssimo</label></div>
+            <div class="form-check"><input class="form-check-input" type="radio" name="aval_iluminacao" value="ruim" id="i2"><label class="form-check-label" for="i2">Ruim</label></div>
+            <div class="form-check"><input class="form-check-input" type="radio" name="aval_iluminacao" value="regular" id="i3"><label class="form-check-label" for="i3">Regular</label></div>
+            <div class="form-check"><input class="form-check-input" type="radio" name="aval_iluminacao" value="bom" id="i4"><label class="form-check-label" for="i4">Bom</label></div>
+            <div class="form-check"><input class="form-check-input" type="radio" name="aval_iluminacao" value="otimo" id="i5"><label class="form-check-label" for="i5">Ótimo</label></div>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label fw-semibold"><i class="bi bi-bus-front-fill me-1"></i> Transporte</label>
+          <div class="d-flex flex-wrap gap-3">
+            <div class="form-check"><input class="form-check-input" type="radio" name="aval_transporte" value="pessimo" id="t1"><label class="form-check-label" for="t1">Péssimo</label></div>
+            <div class="form-check"><input class="form-check-input" type="radio" name="aval_transporte" value="ruim" id="t2"><label class="form-check-label" for="t2">Ruim</label></div>
+            <div class="form-check"><input class="form-check-input" type="radio" name="aval_transporte" value="regular" id="t3"><label class="form-check-label" for="t3">Regular</label></div>
+            <div class="form-check"><input class="form-check-input" type="radio" name="aval_transporte" value="bom" id="t4"><label class="form-check-label" for="t4">Bom</label></div>
+            <div class="form-check"><input class="form-check-input" type="radio" name="aval_transporte" value="otimo" id="t5"><label class="form-check-label" for="t5">Ótimo</label></div>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label fw-semibold"><i class="bi bi-shield-fill me-1"></i> Segurança Pública</label>
+          <div class="d-flex flex-wrap gap-3">
+            <div class="form-check"><input class="form-check-input" type="radio" name="aval_seguranca" value="pessimo" id="sg1"><label class="form-check-label" for="sg1">Péssimo</label></div>
+            <div class="form-check"><input class="form-check-input" type="radio" name="aval_seguranca" value="ruim" id="sg2"><label class="form-check-label" for="sg2">Ruim</label></div>
+            <div class="form-check"><input class="form-check-input" type="radio" name="aval_seguranca" value="regular" id="sg3"><label class="form-check-label" for="sg3">Regular</label></div>
+            <div class="form-check"><input class="form-check-input" type="radio" name="aval_seguranca" value="bom" id="sg4"><label class="form-check-label" for="sg4">Bom</label></div>
+            <div class="form-check"><input class="form-check-input" type="radio" name="aval_seguranca" value="otimo" id="sg5"><label class="form-check-label" for="sg5">Ótimo</label></div>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label fw-semibold"><i class="bi bi-building me-1"></i> Infraestrutura</label>
+          <div class="d-flex flex-wrap gap-3">
+            <div class="form-check"><input class="form-check-input" type="radio" name="aval_infraestrutura" value="pessimo" id="if1"><label class="form-check-label" for="if1">Péssimo</label></div>
+            <div class="form-check"><input class="form-check-input" type="radio" name="aval_infraestrutura" value="ruim" id="if2"><label class="form-check-label" for="if2">Ruim</label></div>
+            <div class="form-check"><input class="form-check-input" type="radio" name="aval_infraestrutura" value="regular" id="if3"><label class="form-check-label" for="if3">Regular</label></div>
+            <div class="form-check"><input class="form-check-input" type="radio" name="aval_infraestrutura" value="bom" id="if4"><label class="form-check-label" for="if4">Bom</label></div>
+            <div class="form-check"><input class="form-check-input" type="radio" name="aval_infraestrutura" value="otimo" id="if5"><label class="form-check-label" for="if5">Ótimo</label></div>
+          </div>
+        </div>
+
+        <div class="mb-2">
+          <label class="form-label fw-semibold"><i class="bi bi-people-fill me-1"></i> Assistência Social</label>
+          <div class="d-flex flex-wrap gap-3">
+            <div class="form-check"><input class="form-check-input" type="radio" name="aval_assistencia" value="pessimo" id="as1"><label class="form-check-label" for="as1">Péssimo</label></div>
+            <div class="form-check"><input class="form-check-input" type="radio" name="aval_assistencia" value="ruim" id="as2"><label class="form-check-label" for="as2">Ruim</label></div>
+            <div class="form-check"><input class="form-check-input" type="radio" name="aval_assistencia" value="regular" id="as3"><label class="form-check-label" for="as3">Regular</label></div>
+            <div class="form-check"><input class="form-check-input" type="radio" name="aval_assistencia" value="bom" id="as4"><label class="form-check-label" for="as4">Bom</label></div>
+            <div class="form-check"><input class="form-check-input" type="radio" name="aval_assistencia" value="otimo" id="as5"><label class="form-check-label" for="as5">Ótimo</label></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ 7 – PARTICIPAÇÃO ══ -->
+    <div class="card card-secao">
+      <div class="card-header">
+        <span class="icone-secao"><i class="bi bi-megaphone-fill"></i></span>
+        7. Participação Popular
+      </div>
+      <div class="card-body">
+        <div class="row g-4">
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">
+              Você já participou de alguma audiência pública, consulta popular ou reunião comunitária promovida pela Prefeitura?
+            </label>
+            <div class="d-flex flex-wrap gap-3 mt-1">
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="participou" id="partSim" value="Sim">
+                <label class="form-check-label" for="partSim">Sim</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="participou" id="partNao" value="Não">
+                <label class="form-check-label" for="partNao">Não</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">
+              Você considera importante a participação da população no planejamento do orçamento municipal?
+            </label>
+            <div class="d-flex flex-wrap gap-3 mt-1">
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="importante" id="impSim" value="Sim">
+                <label class="form-check-label" for="impSim">Sim</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="importante" id="impNao" value="Não">
+                <label class="form-check-label" for="impNao">Não</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="importante" id="impTalvez" value="Talvez">
+                <label class="form-check-label" for="impTalvez">Talvez</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">
+              Gostaria de receber informações sobre futuras audiências públicas e consultas populares?
+            </label>
+            <div class="d-flex flex-wrap gap-3 mt-1">
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="receberInfo" id="recSim" value="Sim">
+                <label class="form-check-label" for="recSim">Sim</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="receberInfo" id="recNao" value="Não">
+                <label class="form-check-label" for="recNao">Não</label>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 8 – OBSERVAÇÕES FINAIS ══ -->
+    <div class="card card-secao">
+      <div class="card-header">
+        <span class="icone-secao"><i class="bi bi-chat-text-fill"></i></span>
+        8. Observações Finais
+      </div>
+      <div class="card-body">
+        <label class="form-label" for="observacoes">
+          Espaço livre para comentários, críticas, elogios ou sugestões adicionais:
+        </label>
+        <textarea id="observacoes" class="form-control" rows="4"
+                  placeholder="Fique à vontade para acrescentar qualquer observação..."
+                  maxlength="1000"></textarea>
+        <div class="form-text">Máximo de 1000 caracteres</div>
+      </div>
+    </div>
+
+    <!-- ══ AVISO ══ -->
+    <div class="aviso-lgpd">
+      <i class="bi bi-info-circle-fill flex-shrink-0 mt-1"></i>
+      <div>
+        <strong>Importante:</strong> As informações coletadas serão utilizadas exclusivamente para subsidiar a
+        elaboração da Lei de Diretrizes Orçamentárias. A participação da população não garante a execução imediata
+        das sugestões apresentadas, mas contribui para a definição das prioridades do município.
+      </div>
+    </div>
+
+    <!-- ══ BOTÃO ENVIAR ══ -->
+    <div class="text-center py-4">
+      <button type="submit" id="btnEnviar" class="btn btn-enviar">
+        <i class="bi bi-send-fill me-2"></i>
+        Enviar Participação
+      </button>
+      <p class="text-muted small mt-2">
+        Seus dados são utilizados apenas para fins estatísticos e de planejamento público.
+      </p>
+    </div>
+
+  </form>
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2026 Prefeitura Municipal de Oriximiná – Consulta Pública LDO 2026</p>
+  <p>Dados armazenados com segurança · <a href="dashboard.html">Ver Dashboard →</a></p>
+</footer>
+
+<script type="module" src="js/form.js"></script>
+</body>
+</html>

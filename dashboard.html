@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="img/prefeitura.png">
+  <title>Dashboard LDO 2026 – Resultados</title>
+  <meta name="description" content="Painel de resultados da Consulta Pública LDO 2026 – Oriximiná." />
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <!-- Estilos locais -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- ══ HEADER ══ -->
+<header class="header-ldo">
+  <div class="container">
+    <div class="header-top d-flex align-items-center justify-content-between">
+      <div class="d-flex align-items-center gap-2">
+        <div class="logo-prefeitura">
+          <img src="img/prefeitura.png" alt="Prefeitura"
+               onerror="this.style.display='none';this.parentElement.innerHTML='📊'">
+        </div>
+        <div class="header-conteudo">
+          <h1>Resultados da Consulta</h1>
+          <span class="subtitulo">LDO 2026 • Análise em tempo real</span>
+        </div>
+      </div>
+      <span class="badge-ano d-none d-md-inline">
+        <i class="bi bi-bar-chart-fill me-1"></i>Dashboard
+      </span>
+    </div>
+  </div>
+</header>
+
+<!-- NAV -->
+<nav class="nav-tabs-ldo">
+  <div class="container">
+    <ul class="nav">
+      <li class="nav-item">
+        <a class="nav-link" href="index.html">
+          <i class="bi bi-ui-checks-grid me-1"></i> Formulário
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link active" href="dashboard.html">
+          <i class="bi bi-bar-chart-fill me-1"></i> Dashboard
+        </a>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ══ MAIN ══ -->
+<main class="container py-4">
+
+  <!-- Loading -->
+  <div id="areaLoading" class="spinner-ldo" style="display:flex">
+    <div class="spinner-border-ldo"></div>
+    <p>Carregando dados do Firebase...</p>
+  </div>
+
+  <!-- Conteúdo -->
+  <div id="areaConteudo" style="display:none">
+
+    <!-- Filtros -->
+    <div class="filtros-bar">
+      <div>
+        <label>Bairro / Localidade</label>
+        <select id="filtroBairro" class="form-select form-select-sm">
+          <option value="">Todos</option>
+        </select>
+      </div>
+      <div>
+        <label>Zona</label>
+        <select id="filtroZona" class="form-select form-select-sm">
+          <option value="">Todas</option>
+        </select>
+      </div>
+      <button id="btnAtualizar" class="btn btn-sm btn-outline-secondary align-self-end">
+        <i class="bi bi-arrow-clockwise me-1"></i> Atualizar
+      </button>
+      <button id="btnExportar" class="btn-exportar align-self-end">
+        <i class="bi bi-download me-1"></i> Exportar CSV
+      </button>
+    </div>
+
+    <!-- Estatísticas -->
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="stat-icon verde"><i class="bi bi-clipboard-check-fill"></i></div>
+          <div>
+            <div class="stat-numero" id="statTotal">0</div>
+            <div class="stat-label">Total de Respostas</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="stat-icon amarelo"><i class="bi bi-map-fill"></i></div>
+          <div>
+            <div class="stat-numero" id="statBairros">0</div>
+            <div class="stat-label">Bairros Participantes</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="stat-icon azul"><i class="bi bi-star-fill"></i></div>
+          <div>
+            <div class="stat-numero" id="statMedia">–</div>
+            <div class="stat-label">Média das Avaliações</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="stat-icon roxo"><i class="bi bi-geo-alt-fill"></i></div>
+          <div>
+            <div class="stat-numero" id="statZona" style="font-size:1.1rem">–</div>
+            <div class="stat-label">Zona Mais Ativa</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="row g-4">
+
+      <div class="col-lg-7">
+        <div class="chart-card">
+          <h5>Prioridades Mais Votadas</h5>
+          <canvas id="chartPrioridades" height="280"></canvas>
+        </div>
+      </div>
+
+      <div class="col-lg-5">
+        <div class="chart-card">
+          <h5>Avaliação dos Serviços (média 1–5)</h5>
+          <canvas id="chartAvaliacoes" height="260"></canvas>
+          <div id="tabelaMedias" class="mt-3"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Ranking + Zona -->
+    <div class="row g-4 mt-0">
+
+      <div class="col-md-6">
+        <div class="chart-card">
+          <h5>Ranking de Necessidades Relatadas</h5>
+          <div id="rankingNecessidades">
+            <p class="text-muted small">Carregando...</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="chart-card">
+          <h5>Participação por Zona</h5>
+          <div id="distribuicaoZona">
+            <p class="text-muted small">Carregando...</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <p class="text-center text-muted mt-3" style="font-size:.78rem">
+      <i class="bi bi-cloud-check me-1"></i>
+      Dados em tempo real via Firebase Firestore · Prefeitura de Oriximiná · LDO 2026
+    </p>
+
+  </div><!-- /areaConteudo -->
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2026 Prefeitura Municipal de Oriximiná – Consulta Pública LDO 2026</p>
+  <p><a href="index.html"><i class="bi bi-arrow-left me-1"></i>Voltar ao Formulário</a></p>
+</footer>
+
+<script type="module" src="js/dashboard.js"></script>
+</body>
+</html>
