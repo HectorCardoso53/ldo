@@ -512,3 +512,11 @@ function limparFormulario() {
   verificarBotaoNec();
   atualizarContador();
 }
+
+<script>
+  document.getElementById("btnEnviar").disabled = true;
+  document.getElementById("btnEnviar").innerHTML = 
+    '<i class="bi bi-lock-fill me-2"></i>Prazo Encerrado';
+  document.getElementById("formLDO").style.opacity = "0.6";
+  document.getElementById("formLDO").style.pointerEvents = "none";
+</script>

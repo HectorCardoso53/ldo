@@ -658,151 +658,333 @@ function renderizarObservacoes(dados) {
 // EXPORTAÇÃO PDF – captura todos os gráficos e tabelas
 // ══════════════════════════════════════════════════════════════
 document.getElementById("btnExportar")?.addEventListener("click", async () => {
-
   const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
 
-  const LARGURA = 297;
-  const ALTURA = 210;
-  const MARGEM = 12;
-  const CONTEUDO = LARGURA - MARGEM * 2;
+  const pdf = new jsPDF({
+    orientation: "portrait",
+    unit: "mm",
+    format: "a4",
+  });
 
-  let y = 0;
-  let pagina = 1;
+  const MARGEM = 15;
+  const LARGURA = 210;
+  const ALTURA = 297;
+  const AREA = LARGURA - MARGEM * 2;
 
-  const AZUL = [37, 99, 235];
-  const AZUL_CLARO = [219, 234, 254];
+  let y = 25;
 
-  const MAX_ALTURA = 80; // 🔥 CONTROLE PRINCIPAL
+  // ── Carrega brasão ────────────────────────
+  let logob64 = null;
+  try {
+    const r = await fetch("./img/brasao_logo.png");
+    if (r.ok) {
+      const blob = await r.blob();
+      logob64 = await new Promise((res) => {
+        const fr = new FileReader();
+        fr.onloadend = () => res(fr.result);
+        fr.readAsDataURL(blob);
+      });
+    }
+  } catch {
+    /* sem logo */
+  }
 
-  const logo = new Image();
-  logo.src = "./img/prefeitura.png";
-  await new Promise((res) => (logo.onload = res));
+  // ── Cabeçalho — padrão Prefeitura ─────────
+  const header = () => {
+    const cx = LARGURA / 2;
 
-  // ───────── HEADER ─────────
-  const cabecalho = (titulo = "") => {
-    pdf.setFillColor(...AZUL);
-    pdf.rect(0, 0, LARGURA, 18, "F");
+    if (logob64) {
+      pdf.addImage(logob64, "PNG", cx - 9, 5, 18, 18);
+    }
 
-    pdf.addImage(logo, "PNG", MARGEM, 2, 14, 14);
+    const topo = logob64 ? 26 : 10;
 
-    pdf.setTextColor(255, 255, 255);
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(9);
+    pdf.setTextColor(0, 0, 0);
+    pdf.text("Prefeitura Municipal de Oriximiná", cx, topo, {
+      align: "center",
+    });
+    pdf.text("Secretaria Municipal de Eficiência Governamental", cx, topo + 5, {
+      align: "center",
+    });
+    pdf.text(
+      "Diretoria de Diagnóstico, Estatística e Transparência",
+      cx,
+      topo + 10,
+      { align: "center" },
+    );
+
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(10);
-    pdf.text("Prefeitura de Oriximiná", 30, 10);
+    pdf.text("RELATÓRIO DE CONSULTA PÚBLICA – LDO 2026", cx, topo + 16, {
+      align: "center",
+    });
 
-    pdf.setFontSize(8);
-    pdf.text(`Página ${pagina}`, LARGURA - MARGEM, 10, { align: "right" });
+    const lineY = topo + 19;
+    pdf.setDrawColor(0);
+    pdf.line(MARGEM, lineY, LARGURA - MARGEM, lineY);
 
-    y = 24;
-
-    if (titulo) {
-      pdf.setFillColor(...AZUL_CLARO);
-      pdf.rect(MARGEM, y, CONTEUDO, 8, "F");
-
-      pdf.setTextColor(...AZUL);
-      pdf.setFontSize(11);
-      pdf.text(titulo, MARGEM + 3, y + 5);
-
-      y += 12;
-    }
+    y = lineY + 7;
   };
 
+  // ── Nova página com cabeçalho ──────────────
   const novaPagina = () => {
     pdf.addPage();
-    pagina++;
-    cabecalho();
+    header();
   };
 
-  const verificarEspaco = (altura) => {
-    if (y + altura > ALTURA - 10) novaPagina();
+  // ── Verifica espaço restante ───────────────
+  const check = (h) => {
+    if (y + h > ALTURA - 15) novaPagina();
   };
 
-  // ───────── FUNÇÃO INTELIGENTE (CORRIGIDA) ─────────
-  const capturarElemento = async (id) => {
-    const el = document.getElementById(id);
-    if (!el) return;
+  // ── Título de seção ────────────────────────
+  const titulo = (txt) => {
+    check(10);
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(12);
+    pdf.setTextColor(0, 0, 0);
+    pdf.text(txt, MARGEM, y);
+    y += 7;
+  };
 
-    verificarEspaco(70);
+  // ── Parágrafo de texto ─────────────────────
+  const paragrafo = (txt) => {
+    check(25);
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(10);
+    pdf.setTextColor(0, 0, 0);
 
-    const canvas = await html2canvas(el, { scale: 2 });
+    const linhas = pdf.splitTextToSize(txt, AREA);
+    pdf.text(linhas, MARGEM, y);
+    y += linhas.length * 5 + 4;
+  };
+
+  // ── Gráfico em página própria com destaque ──
+  const graficoComDados = async (chartInstance, canvasId, tituloTxt) => {
+    const el = document.getElementById(canvasId);
+    if (!el || !chartInstance) return;
+
+    const labels = chartInstance.data.labels;
+    const dados = chartInstance.data.datasets[0].data;
+    const total = dados.reduce((a, b) => a + b, 0);
+    const maior = Math.max(...dados);
+
+    // Cada gráfico começa numa área generosa — quebra se não couber
+    const alturaGrafico = 90;
+    const alturaLegenda = Math.ceil(labels.length / 2) * 7 + 10;
+    const alturaTotal = 10 + alturaGrafico + alturaLegenda + 8;
+    check(alturaTotal);
+
+    // ── Faixa azul de título ──────────────────
+    pdf.setFillColor(37, 99, 235);
+    pdf.roundedRect(MARGEM, y, AREA, 9, 2, 2, "F");
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(10);
+    pdf.setTextColor(255, 255, 255);
+    pdf.text(tituloTxt.toUpperCase(), LARGURA / 2, y + 6, { align: "center" });
+    y += 12;
+
+    // ── Captura e renderiza o gráfico ─────────
+    const yInicio = y;
+    const canvas = await html2canvas(el, { scale: 3 }); // scale 3 = alta resolução
     const img = canvas.toDataURL("image/png");
-
     const ratio = canvas.width / canvas.height;
 
-    let largura = CONTEUDO;
-    let altura = largura / ratio;
-
-    // 🔥 CONTROLE DE TAMANHO
-    if (altura > MAX_ALTURA) {
-      altura = MAX_ALTURA;
-      largura = altura * ratio;
+    let larguraG = AREA;
+    let alturaG = larguraG / ratio;
+    if (alturaG > alturaGrafico) {
+      alturaG = alturaGrafico;
+      larguraG = alturaG * ratio;
     }
 
-    // 🔥 CENTRALIZA
-    const x = (LARGURA - largura) / 2;
+    const xGrafico = MARGEM + (AREA - larguraG) / 2;
+    pdf.addImage(img, "PNG", xGrafico, yInicio, larguraG, alturaG);
+    y = yInicio + alturaG + 5;
 
-    pdf.addImage(img, "PNG", x, y, largura, altura);
+    // ── Linha divisória ───────────────────────
+    pdf.setDrawColor(200, 200, 200);
+    pdf.line(MARGEM, y, LARGURA - MARGEM, y);
+    y += 5;
 
-    y += altura + 10;
+    // ── Tabela de dados com destaque no maior ─
+    pdf.setFontSize(9);
+    const colW = AREA / 2;
+    let col = 0;
+    let yTabela = y;
+
+    for (let i = 0; i < labels.length; i++) {
+      const valor = dados[i];
+      const pct = total ? Math.round((valor / total) * 100) : 0;
+      const eMaior = valor === maior;
+      const x = col === 0 ? MARGEM : MARGEM + colW;
+
+      // fundo destacado para o maior valor
+      if (eMaior) {
+        pdf.setFillColor(219, 234, 254);
+        pdf.roundedRect(x, yTabela - 4.5, colW - 2, 6.5, 1, 1, "F");
+      }
+
+      // barra proporcional mini
+      const barMaxW = colW * 0.3;
+      const barW = total ? (valor / maior) * barMaxW : 0;
+      pdf.setFillColor(
+        eMaior ? 37 : 100,
+        eMaior ? 99 : 149,
+        eMaior ? 235 : 237,
+      );
+      pdf.rect(x, yTabela - 3.5, barW, 3, "F");
+
+      // texto label
+      pdf.setFont("helvetica", eMaior ? "bold" : "normal");
+      pdf.setTextColor(0, 0, 0);
+      const labelCurto = pdf.splitTextToSize(labels[i], colW * 0.58)[0];
+      pdf.text(labelCurto, x + barMaxW + 2, yTabela);
+
+      // valor e percentual alinhados à direita da coluna
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor(eMaior ? 37 : 60, eMaior ? 99 : 60, eMaior ? 235 : 60);
+      pdf.text(`${valor} (${pct}%)`, x + colW - 3, yTabela, { align: "right" });
+      pdf.setTextColor(0, 0, 0);
+
+      col = col === 0 ? 1 : 0;
+      if (col === 0) yTabela += 7;
+
+      if (yTabela > ALTURA - 20) {
+        novaPagina();
+        yTabela = y;
+      }
+    }
+
+    y = yTabela + 10;
   };
 
-  // ───────── TÍTULO DE SEÇÃO ─────────
-  const tituloSecao = (txt) => {
-    verificarEspaco(12);
+  // ══════════════════════════════════════
+  //  CONTEÚDO
+  // ══════════════════════════════════════
+  header();
 
-    pdf.setFillColor(...AZUL_CLARO);
-    pdf.rect(MARGEM, y, CONTEUDO, 8, "F");
+  // 1. Introdução
+  titulo("1. Introdução");
+  paragrafo(
+    "Este relatório apresenta os resultados da Consulta Pública da LDO 2026, " +
+      "permitindo compreender as principais demandas da população e orientar as " +
+      "decisões da gestão municipal.",
+  );
 
-    pdf.setTextColor(...AZUL);
-    pdf.setFont("helvetica", "bold");
-    pdf.setFontSize(11);
-    pdf.text(txt, MARGEM + 3, y + 5);
+  // 2. Visão Geral
+  titulo("2. Visão Geral");
+  const total = document.getElementById("statTotal")?.textContent;
+  const bairros = document.getElementById("statBairros")?.textContent;
+  const media = document.getElementById("statMedia")?.textContent;
+  paragrafo(
+    `Foram registradas ${total} participações, abrangendo ${bairros} bairros. ` +
+      `A média geral de avaliação foi ${media}.`,
+  );
 
-    y += 12;
-  };
+  // 3. Perfil
+  titulo("3. Perfil dos Participantes");
+  await graficoComDados(
+    charts["chartSexo"],
+    "chartSexo",
+    "Distribuição por Sexo",
+  );
+  await graficoComDados(
+    charts["chartZona"],
+    "chartZona",
+    "Participação por Zona",
+  );
+  await graficoComDados(
+    charts["chartPerfil"],
+    "chartPerfil",
+    "Perfil dos Participantes",
+  );
+  paragrafo(
+    "Os dados demonstram a diversidade do público participante, sendo essencial " +
+      "para garantir representatividade nas decisões públicas.",
+  );
 
-  // ───────── COMEÇA ─────────
-  cabecalho("Relatório Completo LDO");
 
-  // 🟦 VISÃO GERAL
-  tituloSecao("Visão Geral");
-  await capturarElemento("areaCards");
+  novaPagina();
+  // 4. Prioridades
+  titulo("4. Prioridades");
+  await graficoComDados(
+    charts["chartPrioridades"],
+    "chartPrioridades",
+    "Prioridades Mais Votadas",
+  );
+  paragrafo(
+    "As prioridades refletem diretamente as principais demandas da população, " +
+      "devendo ser consideradas como base estratégica para o planejamento municipal.",
+  );
 
-  // 🟦 PERFIL
-  tituloSecao("Perfil dos Participantes");
-  await capturarElemento("chartSexo");
-  await capturarElemento("chartZona");
-  await capturarElemento("chartPerfil");
-  await capturarElemento("chartIdade");
-  await capturarElemento("rankingBairros");
 
-  // 🟦 PRIORIDADES
-  tituloSecao("Prioridades e Necessidades");
-  await capturarElemento("chartPrioridades");
-  await capturarElemento("rankingNecessidades");
+  novaPagina();
+  // 5. Avaliação
+  titulo("5. Avaliação dos Serviços");
+  await graficoComDados(
+    charts["chartAvaliacoes"],
+    "chartAvaliacoes",
+    "Avaliação Geral",
+  );
+  await graficoComDados(
+    charts["chartAvaliacoesBarras"],
+    "chartAvaliacoesBarras",
+    "Distribuição de Notas",
+  );
+  paragrafo(
+    "A avaliação dos serviços públicos permite identificar áreas que necessitam " +
+      "de melhorias e aquelas que apresentam bom desempenho.",
+  );
 
-  // 🟦 AVALIAÇÕES
-  tituloSecao("Avaliações dos Serviços Públicos");
-  await capturarElemento("chartAvaliacoes");
-  await capturarElemento("chartAvaliacoesBarras");
-  await capturarElemento("tabelaAvaliacoes");
 
-  // 🟦 ENGAJAMENTO
-  tituloSecao("Engajamento e Participação");
-  await capturarElemento("chartParticipou");
-  await capturarElemento("chartImportante");
-  await capturarElemento("chartReceberInfo");
+  novaPagina();
+  // 6. Engajamento
+  titulo("6. Engajamento");
+  await graficoComDados(
+    charts["chartParticipou"],
+    "chartParticipou",
+    "Participação Anterior",
+  );
+  await graficoComDados(
+    charts["chartImportante"],
+    "chartImportante",
+    "Importância da Participação",
+  );
+  paragrafo(
+    "Os dados demonstram o nível de envolvimento da população com os processos " +
+      "participativos da gestão pública.",
+  );
 
-  // 🟦 SUGESTÕES
-  tituloSecao("Sugestões");
-  await capturarElemento("listaSugestoes");
+  // 7. Conclusão
+  titulo("7. Conclusão");
+  paragrafo(
+    "Os resultados apresentados reforçam a importância da participação popular e " +
+      "servirão como base para a definição das políticas públicas e investimentos do município.",
+  );
 
-  // 🟦 OBSERVAÇÕES
-  tituloSecao("Observações");
-  await capturarElemento("listaObservacoes");
+  // ── Rodapé com paginação ──────────────────
+  const totalPags = pdf.internal.getNumberOfPages();
+  for (let i = 1; i <= totalPags; i++) {
+    pdf.setPage(i);
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(8);
+    pdf.setTextColor(120);
+    pdf.line(MARGEM, 285, LARGURA - MARGEM, 285);
+    pdf.text(
+      `Rua Barão do Rio Branco, nº 2336 – Centro – Oriximiná/PA – CNPJ 05.131.081/0001-82`,
+      LARGURA / 2,
+      290,
+      { align: "center" },
+    );
+    pdf.text(`Página ${i} de ${totalPags}`, LARGURA - MARGEM, 290, {
+      align: "right",
+    });
+    pdf.setTextColor(0);
+  }
 
-  pdf.save("relatorio_ldo_completo.pdf");
+  pdf.save("relatorio_ldo_2026.pdf");
 });
 // ══════════════════════════════════════════════════════════════
 // HELPERS DE GRÁFICO

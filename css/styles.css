@@ -335,6 +335,11 @@ body {
   display: none;
 }
 
+#areaRelatorioPDF {
+  background: #ffffff;
+  padding: 20px;
+}
+
 /* contador prioridades */
 #contadorPrioridades {
   font-size: 0.82rem;
@@ -536,6 +541,8 @@ body {
   padding: 1.5rem;
   box-shadow: var(--sombra);
   margin-bottom: 1.5rem;
+  break-inside: avoid;
+  page-break-inside: avoid;
 }
 
 .chart-card h5 {
